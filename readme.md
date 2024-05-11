@@ -18,8 +18,6 @@ Error Handling: Ensures the API returns appropriate errors for missing parameter
 Rate Limiting: Tests the functionality of rate limits for both single requests and batch usage, verifying the remaining request count after each call.
 Mocks for Controlled Testing: Leverages mocks.mock_helpers.generate_nationalize_api_mock_responses to simulate API responses with specific headers and content, allowing for isolated unit testing without relying on external calls.
 
- Note: Test reports times are in UTC
-
 # Important Folders
 - api_response_models = API response models are kept here
 - helpers = Helper files for test
