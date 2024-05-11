@@ -52,12 +52,21 @@ def test_name_parameter_missing():
         error=ERROR_MISSING_NAME,
     )
 
-
+@responses.activate
 @pytest.mark.parametrize("num_last_names", [2, max_batch_size])
-def test_batch_usage_successful_name_prediction(num_last_names):
+def test_batch_usage_successful_name_prediction(num_last_names, request):
     """
     Verifies successful prediction of nationalities for a batch of last names.
     """
+    responses.add_callback(
+        method=responses.GET,
+        url=url,
+        callback=partial(
+            generate_nationalize_api_mock_responses, test_name=request.node.name
+        ),
+        content_type="application/json",
+    )
+
     names = generate_fake_last_names(num_last_names=num_last_names)
     params = {"name[]": names}
 
@@ -81,7 +90,8 @@ def test_batch_usage_successful_name_prediction(num_last_names):
 
 def test_batch_usage_with_more_than_ten_names():
     """
-    Verifies that the API returns an error response when attempting to predict nationalities for more than ten names in a batch.
+    Verifies that the API returns an error response when attempting to predict 
+    nationalities for more than ten names in a batch.
     """
     names = generate_fake_last_names(num_last_names=11)
 
@@ -121,7 +131,7 @@ def test_x_rate_limit_remaining_for_batch_usage():
     )
 
 
-# @responses.activate
+@responses.activate
 def test_x_rate_limit_too_low(request):
     """
     Verifies that the API returns an error response when the request limit is less than number of names for batch usage.
@@ -163,7 +173,7 @@ def test_x_rate_limit_too_low(request):
     )
 
 
-# @responses.activate
+@responses.activate
 def test_x_rate_limit_reached(request):
     """
     Verifies that the API returns an error response when the request limit is reached during batch/normal usage.
