@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  pytest:
+    build: .
+    command: pytest -vvv --html=./reports/report.html --self-contained-html
+    volumes:
+      - ./logs:/app/logs:rw  # Mount load test report file with read-write access
+      - ./reports:/app/reports:rw  # Mount load test report file with read-write access
+
+
+  
+
+    
