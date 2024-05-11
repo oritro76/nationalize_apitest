@@ -1,4 +1,4 @@
-# Automated e2e tests and load test for GRPC Auth API
+# Automated e2e tests for Nationalize API
 
 **Tech Stack**
 Python 3.12, pytest, requests, respnses, Faker, Docker
