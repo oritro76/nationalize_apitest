@@ -8,9 +8,15 @@ Python 3.12, pytest, requests, respnses, Faker, Docker
 2. Install Docker from https://docs.docker.com/engine/install/
 
 ## Solution Explained
-In this project the https://nationalize.io/ Batch usage functionality is tested with pytest.
-As this service has rate limits, responses has been used for mocking the responses.
 
+This project provides a comprehensive test suite for the Nationalize API, which predicts nationalities based on names. It utilizes the requests library to make HTTP requests and responses to mock API responses for controlled testing scenarios.
+
+Key Features:
+
+Functional Tests: Verifies API behavior for various name formats (single name, last name, batch) and handles expected responses (success, error) with proper data validation using Pydantic models.
+Error Handling: Ensures the API returns appropriate errors for missing parameters, exceeding request limits, and invalid requests.
+Rate Limiting: Tests the functionality of rate limits for both single requests and batch usage, verifying the remaining request count after each call.
+Mocks for Controlled Testing: Leverages mocks.mock_helpers.generate_nationalize_api_mock_responses to simulate API responses with specific headers and content, allowing for isolated unit testing without relying on external calls.
 
  Note: Test reports times are in UTC
 
@@ -18,57 +24,11 @@ As this service has rate limits, responses has been used for mocking the respons
 - api_response_models = API response models are kept here
 - helpers = Helper files for test
 - mocks = mocker for APIs
-- reports = Test results from API are kept here
+- reports = reports of Test results
 - tests = Tests for API
-- logs = Logs of all API requests and responses are kept here
+- logs = Logs of all API requests and responses
 
-## Project Structure At A Glance
-```
-│   .dockerignore
-│   docker-compose.yml
-│   gen_grpc_codes_from_proto.sh
-│   grpc_client.py
-│   main.py
-│   README.md
-│   requirements.txt
-│
-├───auth_grpc_service
-│       auth_service.py
-│       auth_service_context.py
-│       decorators.py
-│       __init__.py
-│
-├───docker
-│   └───grpc
-│           Dockerfile
-│
-├───grpc_generated
-│       auth_pb2.py
-│       auth_pb2_grpc.py
-│       __init__.py
-│
-├───protos
-│       auth.proto
-│
-├───reports
-│   ├───locust
-│   │       report.html
-│   │
-│   └───test_results
-│           report.html
-│
-└───tests
-    │   auth_grpc_test.py
-    │   conftest.py
-    │   __init__.py
-    │
-    └───locust_files
-            grpc_user.py
-            locust_file.py
-            locust_master.conf
-            locust_worker.conf
-            __init__.py
- ```       
+    
 ## Getting Started
 
 #### Install requirements
@@ -81,6 +41,13 @@ pip install -r requirements.txt
 
 ```
 pytest --html=./reports/report.html --self-contained-html tests
+```
+
+### Mocks 
+
+we need to add the below decorator for the tests that we want to use mocks
+```
+@responses.activate
 ```
 
 #### Run API tests and Load tests in docker
