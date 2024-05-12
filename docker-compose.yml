@@ -3,7 +3,7 @@ version: '3.8'
 services:
   pytest:
     build: .
-    command: pytest --html=./reports/report.html --self-contained-html tests -n auto -vv --no-header
+    command: pytest 
     volumes:
       - ./logs:/app/logs:rw  
       - ./reports:/app/reports:rw 
