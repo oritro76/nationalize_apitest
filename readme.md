@@ -16,7 +16,8 @@ Key Features:
 Functional Tests: Verifies API behavior for various name formats (single name, last name, batch) and handles expected responses (success, error) with proper data validation using Pydantic models.
 Error Handling: Ensures the API returns appropriate errors for missing parameters, exceeding request limits, and invalid requests.
 Rate Limiting: Tests the functionality of rate limits for both single requests and batch usage, verifying the remaining request count after each call.
-Mocks for Controlled Testing: Leverages mocks.mock_helpers.generate_nationalize_api_mock_responses to simulate API responses with specific headers and content, allowing for isolated unit testing without relying on external calls.
+Mocks for Controlled Testing: Leverages mocks.mocks.generate_nationalize_api_mock_responses to simulate API responses with specific headers and content, allowing for isolated unit testing without relying on external calls.
+Parallel Execution: For test parallel execution pytest-xdist is used
 
 # Important Folders
 - api_response_models = API response models are kept here
@@ -38,14 +39,7 @@ pip install -r requirements.txt
 ### To run API tests locally
 
 ```
-pytest --html=./reports/report.html --self-contained-html tests
-```
-
-### Mocks 
-
-we need to add the below decorator for the tests that we want to use mocks
-```
-@responses.activate
+pytest --html=./reports/report.html --self-contained-html tests -n auto
 ```
 
 #### Run API tests and Load tests in docker

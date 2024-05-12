@@ -1,7 +1,13 @@
+import random
+import string
+import datetime
 from requests.models import Response
 import requests
 from faker import Faker
-from api_response_models.nationalize_api_models import NationalizeResponse, ErrorResponse
+from api_response_models.nationalize_api_models import (
+    NationalizeResponse,
+    ErrorResponse,
+)
 from settings import x_rate_limit_limit_free_tier
 from loguru import logger
 from pydantic import ValidationError
@@ -162,8 +168,6 @@ def generate_fake_last_names(num_last_names: int) -> list:
 
     fake = Faker()
     last_names = [fake.last_name() for _ in range(num_last_names)]
-    print(last_names)
-
     return last_names
 
 
@@ -196,3 +200,26 @@ def send_n_number_of_batch_requests(count, num_of_names):
             url=url, params=params, hooks={"response": [log_request, log_response]}
         )
         assert response.status_code == requests.codes.ok
+
+
+def generate_random_number(lower_limit: int, upper_limit=1000) -> int:
+    """
+    Generates a random integer between lower_limit and upper_limit.
+    """
+    return random.randint(lower_limit, upper_limit)
+
+
+def generate_random_request_id(length: int = 16) -> str:
+    """
+    Generates a random string of specified length for the request ID.
+    """
+    letters_and_digits = string.ascii_letters + string.digits
+    return "".join(random.choice(letters_and_digits) for _ in range(length))
+
+
+def get_current_date_header() -> str:
+    """
+    Returns the current date and time in HTTP header format.
+    """
+    now = datetime.datetime.now(datetime.timezone.utc)
+    return now.strftime("%a, %d %b %Y %H:%M:%S GMT")

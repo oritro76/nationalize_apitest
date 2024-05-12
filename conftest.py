@@ -1,9 +1,14 @@
+from functools import partial
 from pathlib import Path
 from loguru import logger
 import pytest
 from _pytest.logging import caplog as _caplog
 import logging
 import os
+import responses
+
+from settings import url
+from mocks.mocks import generate_nationalize_api_mock_responses
 
 
 @pytest.fixture
@@ -44,3 +49,21 @@ def write_logs(request):
     logger.remove()
     logger.configure(handlers=[{"sink": log_path, "level": "TRACE", "mode": "w"}])
     logger.enable("my_package")
+
+@pytest.fixture(scope="function")
+def mock_responses(request):
+  """
+  Creates a responses object with a default mock response, registers as a fixture for each test.
+  """
+  with responses.RequestsMock() as m:
+    m.add_callback(
+        method=responses.GET,
+        url=url,
+        callback=partial(
+            generate_nationalize_api_mock_responses, test_name=request.node.name
+        ),
+        content_type="application/json",
+    )
+    yield m  
+
+

@@ -1,49 +1,32 @@
 import os
 import random
-import string
-import datetime
 import json
 from faker import Faker
 from settings import x_rate_limit_limit_free_tier
+from helpers.test_helpers import (
+    generate_random_number,
+    get_current_date_header,
+    generate_random_request_id,
+)
 
-# Constantsdocker images -a -q | % { docker image rm $_ -f }
 DEFAULT_INITIAL_LIMIT = x_rate_limit_limit_free_tier
+PREFIX = "rate_limit_remaining"
 
 
-def generate_random_number(lower_limit, upper_limit=1000) -> int:
-    """
-    Generates a random integer between lower_limit and upper_limit.
-    """
-    return random.randint(lower_limit, upper_limit)
-
-
-def generate_random_request_id(length: int = 16) -> str:
-    """
-    Generates a random string of specified length for the request ID.
-    """
-    letters_and_digits = string.ascii_letters + string.digits
-    return "".join(random.choice(letters_and_digits) for _ in range(length))
-
-
-def get_current_date_header() -> str:
-    """
-    Returns the current date and time in HTTP header format.
-    """
-    now = datetime.datetime.now(datetime.timezone.utc)
-    return now.strftime("%a, %d %b %Y %H:%M:%S GMT")
-
-
-def get_remaining_requests(initial_limit: int = 100, num_of_names: int = 1) -> int:
+def get_remaining_requests(
+    os_var_name_rate_limit_count: str, initial_limit: int = 100, num_of_names: int = 1
+) -> int:
     """
     Returns the remaining requests after deduction.
     """
-    remaining = int(os.environ.get("rate_limit_remaining", initial_limit))
+    remaining = int(os.environ.get(os_var_name_rate_limit_count, initial_limit))
     remaining -= num_of_names
-    os.environ["rate_limit_remaining"] = str(remaining)
+    os.environ[os_var_name_rate_limit_count] = str(remaining)
     return max(0, remaining)
 
 
 def generate_mock_headers(
+    os_var_name_rate_limit_count: str,
     initial_limit: str = DEFAULT_INITIAL_LIMIT,
     num_of_names: int = 1,
     is_error: bool = False,
@@ -53,11 +36,13 @@ def generate_mock_headers(
     """
     if is_error:
         remaining_requests = os.environ.get(
-            "rate_limit_remaining", DEFAULT_INITIAL_LIMIT
+            os_var_name_rate_limit_count, DEFAULT_INITIAL_LIMIT
         )
         content_type = "application/json"
     else:
-        remaining_requests = get_remaining_requests(initial_limit, num_of_names)
+        remaining_requests = get_remaining_requests(
+            os_var_name_rate_limit_count, initial_limit, num_of_names
+        )
         content_type = "application/json; charset=utf-8"
     return {
         "Server": "nginx/1.16.1",
@@ -119,16 +104,16 @@ def generate_nationalize_api_mock_responses(request, test_name: str) -> tuple:
     """
     status_code = 200
     num_of_names = 1
-    if "test_name" not in os.environ:
-        os.environ["test_name"] = test_name
-        os.environ["rate_limit_remaining"] = str(DEFAULT_INITIAL_LIMIT)
+    os_var_name_rate_limit_count = test_name + PREFIX
+    if os_var_name_rate_limit_count not in os.environ:
+        os.environ[os_var_name_rate_limit_count] = str(DEFAULT_INITIAL_LIMIT)
 
-    if int(os.environ.get("rate_limit_remaining", DEFAULT_INITIAL_LIMIT)) == 0:
+    if int(os.environ.get(os_var_name_rate_limit_count, DEFAULT_INITIAL_LIMIT)) == 0:
         status_code = 429
         response = {"error": "Request limit reached"}
 
     if "name[]" in request.params and len(request.params.get("name[]", [])) > int(
-        os.environ.get("rate_limit_remaining", DEFAULT_INITIAL_LIMIT)
+        os.environ.get(os_var_name_rate_limit_count, DEFAULT_INITIAL_LIMIT)
     ):
         status_code = 429
         response = {"error": "Request limit too low to process request"}
@@ -152,8 +137,10 @@ def generate_nationalize_api_mock_responses(request, test_name: str) -> tuple:
         ]
 
     if status_code < 400:
-        headers = generate_mock_headers(num_of_names=num_of_names)
+        headers = generate_mock_headers(
+            os_var_name_rate_limit_count, num_of_names=num_of_names
+        )
     else:
-        headers = generate_mock_headers(is_error=True)
+        headers = generate_mock_headers(os_var_name_rate_limit_count, is_error=True)
 
     return (status_code, headers, json.dumps(response))
