@@ -21,8 +21,10 @@ Key Features:
 
 # Important Folders
 - api_response_models = API response models are kept here
+- clients = http client
 - helpers = Helper files for test
 - mocks = mocker for APIs
+- test-data = scripts to generate test data and mock data
 - reports = reports of Test results
 - tests = Tests for API
 - logs = Logs of all API requests and responses
