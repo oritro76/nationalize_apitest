@@ -4,34 +4,15 @@ import datetime
 from requests.models import Response
 import requests
 from faker import Faker
+from pydantic import ValidationError
+
 from api_response_models.nationalize_api_models import (
     NationalizeResponse,
     ErrorResponse,
 )
-from settings import x_rate_limit_limit_free_tier
-from loguru import logger
-from pydantic import ValidationError
-from settings import url
 
-
-def log_request(response, *args, **kwargs):
-    """
-    logs the request url, headers, body
-
-    """
-    logger.debug(f"Request: {response.request.method} {response.request.url}")
-    logger.debug(f"Headers: {response.request.headers}")
-    logger.debug(f"Body: {response.request.body}")
-
-
-def log_response(response, *args, **kwargs):
-    """
-    logs the response status code, headers, body
-
-    """
-    logger.debug(f"Response Status Code: {response.status_code}")
-    logger.debug(f"Response Headers: {response.headers}")
-    logger.debug(f"Response Body: {response.text}")
+from settings import url, x_rate_limit_limit_free_tier
+from clients.api_client import http_api_client
 
 
 def assert_common_headers(
@@ -196,8 +177,8 @@ def send_n_number_of_batch_requests(count, num_of_names):
         names = generate_fake_last_names(num_last_names=num_of_names)
         params = {"name[]": names}
 
-        response = requests.get(
-            url=url, params=params, hooks={"response": [log_request, log_response]}
+        response = http_api_client.get(
+            url=url, params=params
         )
         assert response.status_code == requests.codes.ok
 

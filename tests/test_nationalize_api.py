@@ -1,4 +1,3 @@
-import requests
 import pytest
 from pydantic import ValidationError
 from settings import url, max_batch_size
@@ -7,16 +6,18 @@ from api_response_models.nationalize_api_models import (
 )
 from helpers.test_helpers import *
 from constants.error_constants import *
+from clients.api_client import http_api_client
 
 
 def test_successful_name_prediction_with_last_name(mock_responses):
     """
-    Verifies that the API returns a successful response with predicted nationalities for a valid last name
+    Verifies that the API returns a successful response 
+    with predicted nationalities for a valid last name
     """
     params = {"name": generate_fake_last_name()}
 
-    response = requests.get(
-        url=url, params=params, hooks={"response": [log_request, log_response]}
+    response = http_api_client.get(
+        url=url, params=params
     )
 
     assert_common_success_response(response=response, params=params)
@@ -24,12 +25,13 @@ def test_successful_name_prediction_with_last_name(mock_responses):
 
 def test_successful_name_prediction_with_full_name(mock_responses):
     """
-    Verifies that the API returns a successful response with predicted nationalities for a valid full name.
+    Verifies that the API returns a successful response with 
+    predicted nationalities for a valid full name.
     """
     params = {"name": generate_fake_name()}
 
-    response = requests.get(
-        url=url, params=params, hooks={"response": [log_request, log_response]}
+    response = http_api_client.get(
+        url=url, params=params
     )
 
     assert_common_success_response(response=response, params=params)
@@ -41,7 +43,7 @@ def test_name_parameter_missing():
 
     """
 
-    response = requests.get(url, hooks={"response": [log_request, log_response]})
+    response = http_api_client.get(url)
 
     assert_common_error_response(
         status_code=requests.codes.unprocessable_entity,
@@ -59,8 +61,8 @@ def test_batch_usage_successful_name_prediction(num_last_names, mock_responses):
     names = generate_fake_last_names(num_last_names=num_last_names)
     params = {"name[]": names}
 
-    response = requests.get(
-        url=url, params=params, hooks={"response": [log_request, log_response]}
+    response = http_api_client.get(
+        url=url, params=params
     )
 
     assert response.status_code == requests.codes.ok
@@ -86,8 +88,8 @@ def test_batch_usage_with_more_than_ten_names():
 
     params = {"name[]": names}
 
-    response = requests.get(
-        url=url, params=params, hooks={"response": [log_request, log_response]}
+    response = http_api_client.get(
+        url=url, params=params
     )
 
     assert_common_error_response(
@@ -97,12 +99,12 @@ def test_batch_usage_with_more_than_ten_names():
 
 def test_x_rate_limit_remaining_for_batch_usage(mock_responses):
     """
-    Verifies the remaining request limit for batch usage after making requests.
+    Verifies the remaining request limit for batch usage after making http_api_client.
     """
     params = {"name": generate_fake_last_name()}
 
-    response = requests.get(
-        url=url, params=params, hooks={"response": [log_request, log_response]}
+    response = http_api_client.get(
+        url=url, params=params
     )
 
     assert response.status_code == requests.codes.ok
@@ -112,7 +114,7 @@ def test_x_rate_limit_remaining_for_batch_usage(mock_responses):
     names = generate_fake_last_names(num_last_names=2)
     params = {"name[]": names}
 
-    response = requests.get(url=url, params=params)
+    response = http_api_client.get(url=url, params=params)
 
     assert response.status_code == requests.codes.ok
     assert x_rate_limit_reamining - len(names) == int(
@@ -128,8 +130,8 @@ def test_x_rate_limit_too_low(mock_responses):
 
     params = {"name[]": generate_fake_last_names(num_last_names=2)}
 
-    response = requests.get(
-        url=url, params=params, hooks={"response": [log_request, log_response]}
+    response = http_api_client.get(
+        url=url, params=params
     )
 
     assert response.status_code == requests.codes.ok
@@ -143,8 +145,8 @@ def test_x_rate_limit_too_low(mock_responses):
 
     params = {"name[]": generate_fake_last_names(num_last_names=max_batch_size)}
 
-    response = requests.get(
-        url=url, params=params, hooks={"response": [log_request, log_response]}
+    response = http_api_client.get(
+        url=url, params=params
     )
 
     assert_common_error_response(
@@ -162,8 +164,8 @@ def test_x_rate_limit_reached(mock_responses):
 
     params = {"name[]": generate_fake_last_names(num_last_names=2)}
 
-    response = requests.get(
-        url=url, params=params, hooks={"response": [log_request, log_response]}
+    response = http_api_client.get(
+        url=url, params=params
     )
 
     assert response.status_code == requests.codes.ok
@@ -177,16 +179,16 @@ def test_x_rate_limit_reached(mock_responses):
 
     params = {"name[]": generate_fake_last_names(num_last_names=x_rate_limit_reamining)}
 
-    response = requests.get(
-        url=url, params=params, hooks={"response": [log_request, log_response]}
+    response = http_api_client.get(
+        url=url, params=params
     )
 
     assert response.status_code == requests.codes.ok
 
     params = {"name": generate_fake_last_name()}
 
-    response = requests.get(
-        url=url, params=params, hooks={"response": [log_request, log_response]}
+    response = http_api_client.get(
+        url=url, params=params
     )
 
     assert_common_error_response(
