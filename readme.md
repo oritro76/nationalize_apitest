@@ -16,8 +16,12 @@ Key Features:
 - Functional Tests: Verifies API behavior for various name formats (single name, last name, batch) and handles expected responses (success, error) with proper data validation using Pydantic models.
 - Error Handling: Ensures the API returns appropriate errors for missing parameters, exceeding request limits, and invalid requests.
 - Rate Limiting: Tests the functionality of rate limits for both single requests and batch usage, verifying the remaining request count after each call.
-- Mocks for Controlled Testing: Leverages mocks.mocks.generate_nationalize_api_mock_responses to simulate API responses with specific headers and content, allowing for isolated testing without relying on external calls.
-- Parallel Execution: For test parallel execution pytest-xdist is used
+- Mocks for Controlled Testing: Leverages mocks.mocks.generate_nationalize_api_mock_responses to simulate API responses with specific headers and content, allowing for isolated testing without relying on external calls. As such we can run the tests with two options, tests against real API and mock responses. For distiguishing, in mock responses, server header is not present. If we want to run against real apis we need to the command line flag
+```
+--use-real-api
+```
+- Parallel Execution: For test parallel execution pytest-xdist is used. But if parallel execution is used then test results are not accurate for rate limit testing. By default parallel execution is enabled as by default most of the tests are using mock responses. Only the negative tests are using real api.
+- Test Markers: Two markers are introduced for tests. smoke: tests to verify system is stable and rate_limit: tests that verify the rate_limit
 
 # Important Folders
 - api_response_models = API response models are kept here
@@ -41,10 +45,21 @@ pip install -r requirements.txt
 ### To run API tests locally
 
 ```
-pytest --html=./reports/report.html --self-contained-html tests -n auto
+pytest --use-real-api
 ```
 
-#### Run API tests and Load tests in docker
+### To run API tests locally with markers
+
+```
+pytest -m smoke
+```
+If rate limit tests to be skipped then use the below marker
+```
+pytest -m "not rate_limits"
+```
+
+#### Run API tests in docker
+In docker tests are running with mock response. please add the command line argument for running with real api in docker compose file for this
 
 ```
 docker compose build
