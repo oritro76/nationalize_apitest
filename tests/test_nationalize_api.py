@@ -1,38 +1,40 @@
 import pytest
 from pydantic import ValidationError
+
+from helpers.test_helpers import *
+from constants.error_constants import *
+from clients.api_client import http_api_client
 from settings import url, max_batch_size
 from api_response_models.nationalize_api_models import (
     NationalizeResponse,
 )
-from helpers.test_helpers import *
-from constants.error_constants import *
-from clients.api_client import http_api_client
+from test_data.test_data import (
+    generate_fake_last_name,
+    generate_fake_last_names,
+    generate_fake_name,
+)
 
 
 def test_successful_name_prediction_with_last_name(mock_responses):
     """
-    Verifies that the API returns a successful response 
+    Verifies that the API returns a successful response
     with predicted nationalities for a valid last name
     """
     params = {"name": generate_fake_last_name()}
 
-    response = http_api_client.get(
-        url=url, params=params
-    )
+    response = http_api_client.get(url=url, params=params)
 
     assert_common_success_response(response=response, params=params)
 
 
 def test_successful_name_prediction_with_full_name(mock_responses):
     """
-    Verifies that the API returns a successful response with 
+    Verifies that the API returns a successful response with
     predicted nationalities for a valid full name.
     """
     params = {"name": generate_fake_name()}
 
-    response = http_api_client.get(
-        url=url, params=params
-    )
+    response = http_api_client.get(url=url, params=params)
 
     assert_common_success_response(response=response, params=params)
 
@@ -61,9 +63,7 @@ def test_batch_usage_successful_name_prediction(num_last_names, mock_responses):
     names = generate_fake_last_names(num_last_names=num_last_names)
     params = {"name[]": names}
 
-    response = http_api_client.get(
-        url=url, params=params
-    )
+    response = http_api_client.get(url=url, params=params)
 
     assert response.status_code == requests.codes.ok
 
@@ -88,12 +88,12 @@ def test_batch_usage_with_more_than_ten_names():
 
     params = {"name[]": names}
 
-    response = http_api_client.get(
-        url=url, params=params
-    )
+    response = http_api_client.get(url=url, params=params)
 
     assert_common_error_response(
-        status_code=requests.codes.unprocessable_entity, response=response, error=ERROR_INVALID_NAME
+        status_code=requests.codes.unprocessable_entity,
+        response=response,
+        error=ERROR_INVALID_NAME,
     )
 
 
@@ -103,9 +103,7 @@ def test_x_rate_limit_remaining_for_batch_usage(mock_responses):
     """
     params = {"name": generate_fake_last_name()}
 
-    response = http_api_client.get(
-        url=url, params=params
-    )
+    response = http_api_client.get(url=url, params=params)
 
     assert response.status_code == requests.codes.ok
 
@@ -130,9 +128,7 @@ def test_x_rate_limit_too_low(mock_responses):
 
     params = {"name[]": generate_fake_last_names(num_last_names=2)}
 
-    response = http_api_client.get(
-        url=url, params=params
-    )
+    response = http_api_client.get(url=url, params=params)
 
     assert response.status_code == requests.codes.ok
 
@@ -145,9 +141,7 @@ def test_x_rate_limit_too_low(mock_responses):
 
     params = {"name[]": generate_fake_last_names(num_last_names=max_batch_size)}
 
-    response = http_api_client.get(
-        url=url, params=params
-    )
+    response = http_api_client.get(url=url, params=params)
 
     assert_common_error_response(
         status_code=requests.codes.too_many_requests,
@@ -164,9 +158,7 @@ def test_x_rate_limit_reached(mock_responses):
 
     params = {"name[]": generate_fake_last_names(num_last_names=2)}
 
-    response = http_api_client.get(
-        url=url, params=params
-    )
+    response = http_api_client.get(url=url, params=params)
 
     assert response.status_code == requests.codes.ok
 
@@ -179,17 +171,13 @@ def test_x_rate_limit_reached(mock_responses):
 
     params = {"name[]": generate_fake_last_names(num_last_names=x_rate_limit_reamining)}
 
-    response = http_api_client.get(
-        url=url, params=params
-    )
+    response = http_api_client.get(url=url, params=params)
 
     assert response.status_code == requests.codes.ok
 
     params = {"name": generate_fake_last_name()}
 
-    response = http_api_client.get(
-        url=url, params=params
-    )
+    response = http_api_client.get(url=url, params=params)
 
     assert_common_error_response(
         status_code=requests.codes.too_many_requests,

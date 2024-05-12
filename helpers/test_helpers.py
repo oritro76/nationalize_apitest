@@ -1,18 +1,14 @@
-import random
-import string
-import datetime
-from requests.models import Response
 import requests
-from faker import Faker
 from pydantic import ValidationError
 
+from requests.models import Response
 from api_response_models.nationalize_api_models import (
     NationalizeResponse,
     ErrorResponse,
 )
-
 from settings import url, x_rate_limit_limit_free_tier
 from clients.api_client import http_api_client
+from test_data.test_data import generate_fake_last_names
 
 
 def assert_common_headers(
@@ -142,33 +138,6 @@ def assert_common_error_response(status_code, response, error):
         assert False, f"Pydantic validation failed: {e}"
 
 
-def generate_fake_last_names(num_last_names: int) -> list:
-    """
-    generate n number of fake last names
-    """
-
-    fake = Faker()
-    last_names = [fake.last_name() for _ in range(num_last_names)]
-    return last_names
-
-
-def generate_fake_last_name() -> str:
-    """
-    generate fake last name
-    """
-
-    fake = Faker()
-    return fake.last_name()
-
-
-def generate_fake_name() -> str:
-    """
-    generate fake name
-    """
-    fake = Faker()
-    return fake.name()
-
-
 def send_n_number_of_batch_requests(count, num_of_names):
     """
     execute n number of batch request with n number of fake names
@@ -177,30 +146,5 @@ def send_n_number_of_batch_requests(count, num_of_names):
         names = generate_fake_last_names(num_last_names=num_of_names)
         params = {"name[]": names}
 
-        response = http_api_client.get(
-            url=url, params=params
-        )
+        response = http_api_client.get(url=url, params=params)
         assert response.status_code == requests.codes.ok
-
-
-def generate_random_number(lower_limit: int, upper_limit=1000) -> int:
-    """
-    Generates a random integer between lower_limit and upper_limit.
-    """
-    return random.randint(lower_limit, upper_limit)
-
-
-def generate_random_request_id(length: int = 16) -> str:
-    """
-    Generates a random string of specified length for the request ID.
-    """
-    letters_and_digits = string.ascii_letters + string.digits
-    return "".join(random.choice(letters_and_digits) for _ in range(length))
-
-
-def get_current_date_header() -> str:
-    """
-    Returns the current date and time in HTTP header format.
-    """
-    now = datetime.datetime.now(datetime.timezone.utc)
-    return now.strftime("%a, %d %b %Y %H:%M:%S GMT")

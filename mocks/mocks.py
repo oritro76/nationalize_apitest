@@ -3,7 +3,7 @@ import random
 import json
 from faker import Faker
 from settings import x_rate_limit_limit_free_tier
-from helpers.test_helpers import (
+from test_data.test_data import (
     generate_random_number,
     get_current_date_header,
     generate_random_request_id,
