@@ -1,15 +1,19 @@
-from functools import partial
-from pathlib import Path
-from loguru import logger
 import pytest
-from _pytest.logging import caplog as _caplog
 import logging
 import os
 import responses
+from functools import partial
+from pathlib import Path
+from loguru import logger
+from responses import RequestsMock
+from _pytest.logging import caplog as _caplog
 
 from settings import url
 from mocks.mocks import generate_nationalize_api_mock_responses
 
+
+def pytest_addoption(parser):
+    parser.addoption("--use-real-api", action="store_true", help="Use real API instead of mock responses")
 
 @pytest.fixture
 def caplog(_caplog):
@@ -53,17 +57,27 @@ def write_logs(request):
 @pytest.fixture(scope="function")
 def mock_responses(request):
   """
-  Creates a responses object with a default mock response, registers as a fixture for each test.
+  Creates a responses object with mock responses (if enabled), registers it as a fixture for each test.
   """
-  with responses.RequestsMock() as m:
-    m.add_callback(
-        method=responses.GET,
-        url=url,
-        callback=partial(
-            generate_nationalize_api_mock_responses, test_name=request.node.name
-        ),
-        content_type="application/json",
-    )
-    yield m  
+  use_real_api = None
+  try:
+    use_real_api = request.config.getoption("--use-real-api")
+  except ValueError:
+    pass
+
+  if not use_real_api:  
+    with RequestsMock() as m:
+      m.add_callback(
+          method=responses.GET,
+          url=url,  
+          callback=partial(
+              generate_nationalize_api_mock_responses,
+              test_name=request.node.name
+          ),
+          content_type="application/json",
+      )
+      yield m
+  else:  
+    yield None  
 
 
