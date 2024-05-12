@@ -16,7 +16,7 @@ Key Features:
 - Functional Tests: Verifies API behavior for various name formats (single name, last name, batch) and handles expected responses (success, error) with proper data validation using Pydantic models.
 - Error Handling: Ensures the API returns appropriate errors for missing parameters, exceeding request limits, and invalid requests.
 - Rate Limiting: Tests the functionality of rate limits for both single requests and batch usage, verifying the remaining request count after each call.
-- Mocks for Controlled Testing: Leverages mocks.mocks.generate_nationalize_api_mock_responses to simulate API responses with specific headers and content, allowing for isolated unit testing without relying on external calls.
+- Mocks for Controlled Testing: Leverages mocks.mocks.generate_nationalize_api_mock_responses to simulate API responses with specific headers and content, allowing for isolated testing without relying on external calls.
 - Parallel Execution: For test parallel execution pytest-xdist is used
 
 # Important Folders
