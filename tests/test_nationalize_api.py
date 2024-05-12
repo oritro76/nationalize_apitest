@@ -15,6 +15,7 @@ from test_data.test_data import (
 )
 
 
+@pytest.mark.smoke
 def test_successful_name_prediction_with_last_name(mock_responses):
     """
     Verifies that the API returns a successful response
@@ -54,6 +55,7 @@ def test_name_parameter_missing():
     )
 
 
+@pytest.mark.smoke
 @pytest.mark.parametrize("num_last_names", [2, max_batch_size])
 def test_batch_usage_successful_name_prediction(num_last_names, mock_responses):
     """
@@ -96,7 +98,7 @@ def test_batch_usage_with_more_than_ten_names():
         error=ERROR_INVALID_NAME,
     )
 
-
+@pytest.mark.rate_limit
 def test_x_rate_limit_remaining_for_batch_usage(mock_responses):
     """
     Verifies the remaining request limit for batch usage after making http_api_client.
@@ -119,7 +121,7 @@ def test_x_rate_limit_remaining_for_batch_usage(mock_responses):
         response.headers["x-rate-limit-remaining"]
     )
 
-
+@pytest.mark.rate_limit
 def test_x_rate_limit_too_low(mock_responses):
     """
     Verifies that the API returns an error response when the request
@@ -149,7 +151,7 @@ def test_x_rate_limit_too_low(mock_responses):
         error=ERROR_REQUEST_LIMIT_LOW,
     )
 
-
+@pytest.mark.rate_limit
 def test_x_rate_limit_reached(mock_responses):
     """
     Verifies that the API returns an error response when the
