@@ -5,8 +5,8 @@ services:
     build: .
     command: pytest --html=./reports/report.html --self-contained-html tests -n auto -vv --no-header
     volumes:
-      - ./logs:/app/logs:rw  # Mount load test report file with read-write access
-      - ./reports:/app/reports:rw  # Mount load test report file with read-write access
+      - ./logs:/app/logs:rw  
+      - ./reports:/app/reports:rw 
 
 
   
