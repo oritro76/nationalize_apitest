@@ -20,7 +20,10 @@ Key Features:
 ```
 --use-real-api
 ```
-- Parallel Execution: For test parallel execution pytest-xdist is used. But if parallel execution is used then test results are not accurate for rate limit testing. By default parallel execution is enabled as by default most of the tests are using mock responses. Only the negative tests are using real api.
+- Parallel Execution: For test parallel execution pytest-xdist is used. But if parallel execution is used then test results are not accurate for rate limit testing. Only the negative tests are using real api. To run the tests in parallel use the command line option
+```
+-n auto
+```
 - Test Markers: Two markers are introduced for tests. smoke: tests to verify system is stable and rate_limit: tests that verify the rate_limit
 
 # Important Folders
