@@ -45,6 +45,7 @@ def generate_mock_headers(
         )
         content_type = "application/json; charset=utf-8"
     return {
+        "Server": "mock-server",
         "Content-Type": content_type,
         "Date": get_current_date_header(),
         "Connection": "keep-alive",
