@@ -39,12 +39,13 @@ jobs:
       run: pip install -r requirements.txt
     - name: run tests
       run: python3 -m pytest ${{ github.event.inputs.pytest_args }}
+    - name: zip test results and log files
+      run: zip logs_and_reports.zip logs reports
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.3.3
       with:
         path: |
-          .\logs\
-          .\reports\
+          logs_and_reports.zip
 
     
     
